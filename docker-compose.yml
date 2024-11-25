@@ -1,0 +1,71 @@
+version: "3.9"
+services:
+  data-generator:
+    build:
+      context: .
+      dockerfile: ./Docker/data_generator/Dockerfile
+    container_name: data_generator
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+
+  authorization:
+    build:
+      context: .
+      dockerfile: ./Docker/authorization/Dockerfile
+    container_name: authorization
+    ports:
+      - "5001:5001"
+    depends_on:
+      - grafana
+    volumes:
+      - auth-db:/app/users.db
+    env_file: .env
+    networks:
+      - app-network
+
+  metrics-db:
+    build:
+      context: .
+      dockerfile: ./Docker/metrics_to_db/Dockerfile
+    container_name: metrics_db
+    ports:
+      - "5003:5003"
+    volumes:
+      - metrics-db:/app/metrics.db
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "5002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
+
+volumes:
+  auth-db:
+  metrics-db:
+  grafana-data:
+
+networks:
+  app-network:
