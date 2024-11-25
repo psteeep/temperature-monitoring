@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY ./services/data_generator.py .
 
-RUN pip install flask
+RUN pip install flask prometheus_client
 
 EXPOSE 5000
 
