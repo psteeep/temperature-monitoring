@@ -25,18 +25,6 @@ services:
     networks:
       - app-network
 
-  metrics-db:
-    build:
-      context: .
-      dockerfile: ./Docker/metrics_to_db/Dockerfile
-    container_name: metrics_db
-    ports:
-      - "5003:5003"
-    volumes:
-      - metrics-db:/app/metrics.db
-    networks:
-      - app-network
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
